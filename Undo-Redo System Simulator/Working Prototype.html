@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Undo / Redo Simulator (Stack Prototype)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --bg: #f4f5fb;
+            --card-bg: #ffffff;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --danger: #dc2626;
+            --border: #e5e7eb;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+        }
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top left, #e0f2fe, #f9fafb);
+            color: var(--text-main);
+        }
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 18px 45px rgba(15,23,42,0.12);
+            padding: 24px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+        }
+        .subtitle {
+            margin: 4px 0 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .badge {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 2fr 1.3fr;
+            gap: 18px;
+        }
+        @media (max-width: 900px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        .panel {
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            background: #f9fafb;
+            padding: 14px 16px;
+        }
+        .panel h2 {
+            margin: 0 0 6px;
+            font-size: 1rem;
+        }
+        .panel small {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .text-box {
+            margin-top: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            background: #ffffff;
+            border: 1px dashed var(--border);
+            min-height: 40px;
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+        .text-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .controls {
+            margin-top: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        input[type="text"] {
+            padding: 7px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            width: 80px;
+        }
+        .btn {
+            border: none;
+            padding: 8px 14px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .btn-outline {
+            background: #fff;
+            border: 1px solid #bfdbfe;
+            color: var(--primary);
+        }
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+        .status {
+            margin-top: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        .stack-container {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0,1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .stack-box {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            font-size: 0.8rem;
+        }
+        .stack-box h3 {
+            margin: 0 0 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        ul.stack-list {
+            list-style: none;
+            padding-left: 0;
+            margin: 0;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        ul.stack-list li {
+            font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            padding: 2px 0;
+        }
+        .empty {
+            color: #9ca3af;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h1>Undo / Redo Simulator</h1>
+                <p class="subtitle">Stack-based prototype matching your C logic</p>
+            </div>
+            <span class="badge">Interactive Demo</span>
+        </div>
+
+        <div class="grid">
+            <div class="panel">
+                <h2>Text Editor</h2>
+                <small>Type a character, delete last, then use Undo / Redo to simulate stack operations.</small>
+
+                <div style="margin-top: 12px;">
+                    <div class="text-label">Current Text:</div>
+                    <div id="text-display" class="text-box"></div>
+                </div>
+
+                <div class="controls">
+                    <div>
+                        <label for="char-input" class="text-label">Character to type</label><br>
+                        <input type="text" id="char-input" maxlength="1" placeholder="a">
+                    </div>
+
+                    <button class="btn btn-primary" id="btn-type">Type Character</button>
+                    <button class="btn btn-outline" id="btn-delete">Delete Character</button>
+                    <button class="btn btn-outline" id="btn-undo">Undo</button>
+                    <button class="btn btn-outline" id="btn-redo">Redo</button>
+                    <button class="btn btn-danger" id="btn-reset">Reset All</button>
+                </div>
+
+                <div class="status" id="status-msg"></div>
+            </div>
+
+            <div class="panel">
+                <h2>Stacks</h2>
+                <small>Top of stack is at the bottom (like your C array with top index).</small>
+
+                <div class="stack-container">
+                    <div class="stack-box">
+                        <h3>Undo Stack</h3>
+                        <ul id="undo-list" class="stack-list"></ul>
+                    </div>
+                    <div class="stack-box">
+                        <h3>Redo Stack</h3>
+                        <ul id="redo-list" class="stack-list"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let text = "";
+    let undoStack = [];
+    let redoStack = [];
+
+    const textDisplay = document.getElementById("text-display");
+    const statusMsg = document.getElementById("status-msg");
+    const charInput = document.getElementById("char-input");
+    const undoList = document.getElementById("undo-list");
+    const redoList = document.getElementById("redo-list");
+
+    const btnType = document.getElementById("btn-type");
+    const btnDelete = document.getElementById("btn-delete");
+    const btnUndo = document.getElementById("btn-undo");
+    const btnRedo = document.getElementById("btn-redo");
+    const btnReset = document.getElementById("btn-reset");
+
+    function renderText() {
+        textDisplay.textContent = text || "(empty)";
+    }
+
+    function renderStacks() {
+        undoList.innerHTML = "";
+        redoList.innerHTML = "";
+
+        if (undoStack.length === 0) {
+            const li = document.createElement("li");
+            li.textContent = "empty";
+            li.classList.add("empty");
+            undoList.appendChild(li);
+        } else {
+            undoStack.forEach((op, idx) => {
+                const li = document.createElement("li");
+                li.textContent = `${idx}: ${op.action} '${op.value}'`;
+                undoList.appendChild(li);
+            });
+        }
+
+        if (redoStack.length === 0) {
+            const li = document.createElement("li");
+            li.textContent = "empty";
+            li.classList.add("empty");
+            redoList.appendChild(li);
+        } else {
+            redoStack.forEach((op, idx) => {
+                const li = document.createElement("li");
+                li.textContent = `${idx}: ${op.action} '${op.value}'`;
+                redoList.appendChild(li);
+            });
+        }
+    }
+
+    function setStatus(msg) {
+        statusMsg.textContent = msg || "";
+    }
+
+    function clearRedo() {
+        redoStack = [];
+    }
+
+    function typeChar(c) {
+        if (!c) return;
+        text += c;
+        undoStack.push({ action: "TYPE", value: c });
+        clearRedo();
+        setStatus(`Typed '${c}'`);
+        refresh();
+    }
+
+    function deleteChar() {
+        if (text.length === 0) {
+            setStatus("Nothing to delete.");
+            return;
+        }
+        const removed = text[text.length - 1];
+        text = text.slice(0, -1);
+        undoStack.push({ action: "DELETE", value: removed });
+        clearRedo();
+        setStatus(`Deleted '${removed}'`);
+        refresh();
+    }
+
+    function undo() {
+        if (undoStack.length === 0) {
+            setStatus("Nothing to undo!");
+            return;
+        }
+        const op = undoStack.pop();
+
+        if (op.action === "TYPE") {
+            text = text.slice(0, -1);
+            redoStack.push({ action: "TYPE", value: op.value });
+            setStatus("Undo: removed last typed character.");
+        } else if (op.action === "DELETE") {
+            text += op.value;
+            redoStack.push({ action: "DELETE", value: op.value });
+            setStatus("Undo: restored deleted character.");
+        }
+        refresh();
+    }
+
+    function redo() {
+        if (redoStack.length === 0) {
+            setStatus("Nothing to redo!");
+            return;
+        }
+        const op = redoStack.pop();
+
+        if (op.action === "TYPE") {
+            text += op.value;
+            undoStack.push({ action: "TYPE", value: op.value });
+            setStatus("Redo: typed character again.");
+        } else if (op.action === "DELETE") {
+            text = text.slice(0, -1);
+            undoStack.push({ action: "DELETE", value: op.value });
+            setStatus("Redo: deleted character again.");
+        }
+        refresh();
+    }
+
+    function resetAll() {
+        text = "";
+        undoStack = [];
+        redoStack = [];
+        setStatus("Reset all state.");
+        refresh();
+    }
+
+    function refresh() {
+        renderText();
+        renderStacks();
+    }
+
+    btnType.addEventListener("click", () => {
+        const c = charInput.value.trim();
+        if (c.length !== 1) {
+            setStatus("Please enter exactly one character.");
+            return;
+        }
+        typeChar(c);
+        charInput.value = "";
+        charInput.focus();
+    });
+
+    charInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            btnType.click();
+        }
+    });
+
+    btnDelete.addEventListener("click", deleteChar);
+    btnUndo.addEventListener("click", undo);
+    btnRedo.addEventListener("click", redo);
+    btnReset.addEventListener("click", resetAll);
+
+    refresh();
+</script>
+
+</body>
+</html>
