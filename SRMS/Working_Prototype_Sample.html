@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f4f5fb;
+            --card-bg: #ffffff;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --radius: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background: radial-gradient(circle at top left, #e0f2fe, #f9fafb);
+            color: var(--text-main);
+        }
+
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+            padding: 28px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.6rem;
+            letter-spacing: 0.02em;
+        }
+
+        .subtitle {
+            margin: 4px 0 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            font-size: 0.78rem;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        #login-container {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 9px 11px;
+            margin-bottom: 14px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-outline {
+            background: #fff;
+            color: var(--primary);
+            border: 1px solid #bfdbfe;
+        }
+
+        .btn-outline:hover {
+            background: #eff6ff;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            border-radius: 999px;
+        }
+
+        .error-msg, .success-msg {
+            font-size: 0.82rem;
+            padding: 8px 10px;
+            border-radius: 999px;
+            margin-bottom: 12px;
+            display: none;
+        }
+
+        .error-msg {
+            background: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .success-msg {
+            background: #ecfdf3;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        #app-container {
+            display: none;
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 2fr);
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .app-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: #f9fafb;
+            border-radius: 16px;
+            padding: 16px 18px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin: 0 0 10px;
+        }
+
+        .panel small {
+            color: var(--text-muted);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 14px;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-bar input {
+            max-width: 260px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            max-height: 420px;
+            overflow: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+            min-width: 800px;
+        }
+
+        thead {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            background: #f3f4f6;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+            white-space: nowrap;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .tag {
+            padding: 2px 7px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            border: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .footer-note {
+            margin-top: 12px;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="wrapper">
+    <div class="card">
+
+        <div class="card-header">
+            <div>
+                <h1>Student Management System</h1>
+                <p class="subtitle">Admin-controlled CRUD operations • Browser-based prototype</p>
+            </div>
+            <span class="badge">Prototype UI</span>
+        </div>
+
+        <div id="login-container">
+            <p class="subtitle" style="margin-bottom: 12px;">
+                Please login as <strong>admin</strong> to manage student records.
+            </p>
+            <div class="error-msg" id="login-error">Incorrect password. Try again.</div>
+
+            <label for="admin-password">Admin Password</label>
+            <input type="password" id="admin-password" placeholder="Enter admin password (hint: admin123)" />
+
+            <button class="btn btn-primary" id="login-btn">
+                Login
+            </button>
+        </div>
+
+        <div id="app-container">
+            <div class="app-grid">
+                <div class="panel">
+                    <h2>Student Details</h2>
+                    <small>Use this form to add or update student records.</small>
+                    <br><br>
+
+                    <form id="student-form">
+                        <input type="hidden" id="editing-index" value="">
+
+                        <label for="roll">Roll Number</label>
+                        <input type="text" id="roll" required placeholder="e.g., 22BTECH001">
+
+                        <div class="form-row">
+                            <div>
+                                <label for="name">Name</label>
+                                <input type="text" id="name" required placeholder="Student full name">
+                            </div>
+                            <div>
+                                <label for="age">Age</label>
+                                <input type="number" id="age" required min="1" max="120" placeholder="18">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div>
+                                <label for="gender">Gender</label>
+                                <input type="text" id="gender" placeholder="Male / Female / Other">
+                            </div>
+                            <div>
+                                <label for="course">Course</label>
+                                <input type="text" id="course" placeholder="e.g., B.Tech">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div>
+                                <label for="branch">Branch</label>
+                                <input type="text" id="branch" placeholder="e.g., CSE">
+                            </div>
+                            <div>
+                                <label for="marks">Marks</label>
+                                <input type="number" id="marks" step="0.01" min="0" max="100" placeholder="0–100">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div>
+                                <label for="phone">Phone</label>
+                                <input type="text" id="phone" placeholder="10-digit number">
+                            </div>
+                            <div>
+                                <label for="email">Email</label>
+                                <input type="email" id="email" placeholder="name@example.com">
+                            </div>
+                        </div>
+
+                        <div class="success-msg" id="form-success"></div>
+                        <div class="error-msg" id="form-error"></div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submit-btn">Add Student</button>
+                            <button type="button" class="btn btn-outline" id="reset-btn">Clear</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="panel">
+                    <h2>Student Records</h2>
+                    <small>Search, edit, or delete registered students.</small>
+                    <br><br>
+
+                    <div class="search-bar">
+                        <input type="text" id="search-input" placeholder="Search by roll, name, course, branch..." />
+                        <button class="btn btn-outline" id="clear-search-btn">Reset</button>
+                        <span class="tag" id="count-tag">0 students</span>
+                    </div>
+
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Roll</th>
+                                <th>Name</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Course</th>
+                                <th>Branch</th>
+                                <th>Marks</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody id="students-tbody">
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="footer-note">
+                        <span>Data is stored in <strong>browser localStorage</strong> (no server needed).</span>
+                        <button class="btn btn-danger btn-sm" id="clear-all-btn">Clear All Records</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    const ADMIN_PASSWORD = "admin123";
+    const STORAGE_KEY = "sms_students";
+
+    let students = [];
+
+    const loginContainer = document.getElementById("login-container");
+    const appContainer = document.getElementById("app-container");
+    const loginError = document.getElementById("login-error");
+    const loginBtn = document.getElementById("login-btn");
+    const adminPasswordInput = document.getElementById("admin-password");
+
+    const studentForm = document.getElementById("student-form");
+    const editingIndexInput = document.getElementById("editing-index");
+    const submitBtn = document.getElementById("submit-btn");
+    const resetBtn = document.getElementById("reset-btn");
+    const formSuccess = document.getElementById("form-success");
+    const formError = document.getElementById("form-error");
+
+    const rollInput = document.getElementById("roll");
+    const nameInput = document.getElementById("name");
+    const ageInput = document.getElementById("age");
+    const genderInput = document.getElementById("gender");
+    const courseInput = document.getElementById("course");
+    const branchInput = document.getElementById("branch");
+    const marksInput = document.getElementById("marks");
+    const phoneInput = document.getElementById("phone");
+    const emailInput = document.getElementById("email");
+
+    const searchInput = document.getElementById("search-input");
+    const clearSearchBtn = document.getElementById("clear-search-btn");
+    const tbody = document.getElementById("students-tbody");
+    const countTag = document.getElementById("count-tag");
+    const clearAllBtn = document.getElementById("clear-all-btn");
+
+    function showApp() {
+        loginContainer.style.display = "none";
+        appContainer.style.display = "block";
+    }
+
+    function showLoginError(msg) {
+        loginError.textContent = msg;
+        loginError.style.display = "block";
+    }
+
+    function hideLoginError() {
+        loginError.style.display = "none";
+    }
+
+    function showFormMessage(type, msg) {
+        if (type === "success") {
+            formSuccess.textContent = msg;
+            formSuccess.style.display = "block";
+            formError.style.display = "none";
+        } else if (type === "error") {
+            formError.textContent = msg;
+            formError.style.display = "block";
+            formSuccess.style.display = "none";
+        } else {
+            formError.style.display = "none";
+            formSuccess.style.display = "none";
+        }
+        if (msg) {
+            setTimeout(() => {
+                formSuccess.style.display = "none";
+                formError.style.display = "none";
+            }, 2200);
+        }
+    }
+
+    function saveToStorage() {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(students));
+    }
+
+    function loadFromStorage() {
+        const data = localStorage.getItem(STORAGE_KEY);
+        if (data) {
+            try {
+                students = JSON.parse(data) || [];
+            } catch (e) {
+                students = [];
+            }
+        }
+    }
+
+    function renderTable(filterText = "") {
+        tbody.innerHTML = "";
+        let filtered = students;
+
+        if (filterText.trim() !== "") {
+            const q = filterText.toLowerCase();
+            filtered = students.filter(stu =>
+                stu.roll.toLowerCase().includes(q) ||
+                stu.name.toLowerCase().includes(q) ||
+                stu.course.toLowerCase().includes(q) ||
+                stu.branch.toLowerCase().includes(q) ||
+                stu.email.toLowerCase().includes(q)
+            );
+        }
+
+        filtered.forEach((stu, index) => {
+            const tr = document.createElement("tr");
+
+            tr.innerHTML = `
+                <td>${stu.roll}</td>
+                <td>${stu.name}</td>
+                <td>${stu.age}</td>
+                <td>${stu.gender}</td>
+                <td>${stu.course}</td>
+                <td>${stu.branch}</td>
+                <td>${stu.marks}</td>
+                <td>${stu.phone}</td>
+                <td>${stu.email}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline" data-action="edit" data-index="${index}">Edit</button>
+                    <button class="btn btn-sm btn-danger" data-action="delete" data-index="${index}">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        countTag.textContent = `${students.length} student${students.length !== 1 ? "s" : ""}`;
+    }
+
+    function clearForm() {
+        studentForm.reset();
+        editingIndexInput.value = "";
+        submitBtn.textContent = "Add Student";
+        showFormMessage("", "");
+    }
+
+    function fillForm(stu, index) {
+        rollInput.value = stu.roll;
+        nameInput.value = stu.name;
+        ageInput.value = stu.age;
+        genderInput.value = stu.gender;
+        courseInput.value = stu.course;
+        branchInput.value = stu.branch;
+        marksInput.value = stu.marks;
+        phoneInput.value = stu.phone;
+        emailInput.value = stu.email;
+        editingIndexInput.value = index;
+        submitBtn.textContent = "Update Student";
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    loginBtn.addEventListener("click", () => {
+        const value = adminPasswordInput.value;
+        if (value === ADMIN_PASSWORD) {
+            hideLoginError();
+            showApp();
+        } else {
+            showLoginError("Incorrect password. Hint: admin123");
+        }
+    });
+
+    adminPasswordInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+            loginBtn.click();
+        }
+    });
+
+    studentForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const roll = rollInput.value.trim();
+        const name = nameInput.value.trim();
+        const age = parseInt(ageInput.value, 10);
+        const gender = genderInput.value.trim();
+        const course = courseInput.value.trim();
+        const branch = branchInput.value.trim();
+        const marks = parseFloat(marksInput.value || 0);
+        const phone = phoneInput.value.trim();
+        const email = emailInput.value.trim();
+
+        if (!roll || !name || !age || !course || !branch) {
+            showFormMessage("error", "Please fill all required fields (Roll, Name, Age, Course, Branch).");
+            return;
+        }
+
+        const editingIndex = editingIndexInput.value;
+
+        const duplicateIndex = students.findIndex(
+            (stu, idx) => stu.roll.toLowerCase() === roll.toLowerCase() && idx.toString() !== editingIndex
+        );
+        if (duplicateIndex !== -1) {
+            showFormMessage("error", "A student with this roll number already exists.");
+            return;
+        }
+
+        const studentObj = {
+            roll,
+            name,
+            age: isNaN(age) ? "" : age,
+            gender,
+            course,
+            branch,
+            marks: isNaN(marks) ? "" : marks,
+            phone,
+            email
+        };
+
+        if (editingIndex === "") {
+            students.push(studentObj);
+            showFormMessage("success", "Student added successfully.");
+        } else {
+            students[parseInt(editingIndex, 10)] = studentObj;
+            showFormMessage("success", "Student record updated.");
+        }
+
+        saveToStorage();
+        renderTable(searchInput.value);
+        clearForm();
+    });
+
+    resetBtn.addEventListener("click", () => {
+        clearForm();
+    });
+
+    tbody.addEventListener("click", (e) => {
+        const btn = e.target.closest("button");
+        if (!btn) return;
+
+        const index = parseInt(btn.getAttribute("data-index"), 10);
+        const action = btn.getAttribute("data-action");
+
+        if (action === "edit") {
+            fillForm(students[index], index);
+        } else if (action === "delete") {
+            const confirmed = confirm("Are you sure you want to delete this record?");
+            if (confirmed) {
+                students.splice(index, 1);
+                saveToStorage();
+                renderTable(searchInput.value);
+                showFormMessage("success", "Record deleted.");
+                clearForm();
+            }
+        }
+    });
+
+    searchInput.addEventListener("input", () => {
+        renderTable(searchInput.value);
+    });
+
+    clearSearchBtn.addEventListener("click", () => {
+        searchInput.value = "";
+        renderTable("");
+    });
+
+    clearAllBtn.addEventListener("click", () => {
+        const confirmed = confirm("This will remove all student records from this browser. Continue?");
+        if (confirmed) {
+            students = [];
+            saveToStorage();
+            renderTable("");
+            clearForm();
+        }
+    });
+
+    loadFromStorage();
+    renderTable("");
+</script>
+
+</body>
+</html>
